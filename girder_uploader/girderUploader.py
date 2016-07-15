@@ -1,10 +1,31 @@
+"""Includes girderUploader class.
+
+girderUploader uses the girder client to upload an item
+or a folder to girder.
+
+"""
+
 import girder_client
 from .bioportalSearchWidgets import BioportalSearchWidgets
 
+
 class GirderUploader:
+    """Use girder client to upload files to girder.
+
+    Option to request metadata from the user before upload,
+    can be uploaded without metadata as well.
+
+    """
 
     def __init__(self, girder_api_url, username, password):
-        self._client = girder_client.GirderClient(apiUrl = girder_api_url)
+        """Autheticate with girder instance, prepare for interaction.
+
+        param: girder_api_url: the url to the girder instance.
+        param: username: the user name of the owner of the specific instance
+        param: password: the password for the user name.
+
+        """
+        self._client = girder_client.GirderClient(apiUrl=girder_api_url)
         self._client.authenticate(username, password)
         self._bio_search = BioportalSearchWidgets(self.__submit_callback)
         self._metadata = dict()
@@ -27,7 +48,7 @@ class GirderUploader:
         if self._request_metadata:
             self._bio_search.display_widgets()
         else:
-            parentId, parentType = parent.__get_parent_id_and_type()
+            parentId, parentType = self.__get_parent_id_and_type()
             self._client.upload(self._local_path, parentId,
                                 parent_type=parentType)
 
@@ -75,11 +96,11 @@ class GirderUploader:
             name = json_result['name']
             resource = dictionary['@id']
             id = get_id(resource)
-            meta = {'Ontology Name' : name,
-                    'Ontology Acronym' : acronym,
+            meta = {'Ontology Name': name,
+                    'Ontology Acronym': acronym,
                     'Name': keyword,
-                    'ID' : id,
-                    'Resource URL' : resource}
+                    'ID': id,
+                    'Resource URL': resource}
             self._metadata[topic] = meta
 
         for name in results:
@@ -97,10 +118,8 @@ class GirderUploader:
         parentId = response['_id']
         return (parentId, parentType)
 
-
     def __upload_item_callback(self, item, filepath):
         self._client.addMetadataToItem(item['_id'], self._metadata)
 
     def __upload_folder_callback(self, folder, filepath):
         self._client.addMetadataToFolder(folder['_id'], self._metadata)
-        
