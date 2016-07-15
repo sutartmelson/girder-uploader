@@ -108,7 +108,7 @@ class BioportalSearchWidgets:
         """
         self._ontologies[name] = ontologies
 
-        input_widget = widgets.Text(description=name, value='')
+        input_widget = widgets.Text(description=name, value='', width='100%')
         results_name = name + " results:"
         if required:
             input_widget.background_color = self._background_color
@@ -118,11 +118,23 @@ class BioportalSearchWidgets:
         self._search_widgets[name] = input_widget
 
         results_widget = widgets.Select(options=['...'],
-                                        description=results_name)
+                                        description=results_name,
+                                        width='300')
         self._result_widgets[results_name] = results_widget
 
-        contains = [input_widget, results_widget]
-        container = widgets.HBox(children=contains)
+        input_contain = [input_widget]
+        input_container = widgets.HBox(children=input_contain)
+
+        add_button = widgets.Button(description='add', width='100%')
+        remove_button = widgets.Button(description='remove')
+        buttons_container = widgets.VBox(children =[add_button, remove_button])
+
+        added_words = widgets.Select(description='added keywords',
+                                     width='300')
+
+        bottom_contains = [results_widget, buttons_container, added_words]
+        bottom_container = widgets.HBox(children=bottom_contains)
+        container = widgets.VBox(children=[input_container, bottom_container])
         self._containers.append(container)
 
     def __validate_apply(self):
