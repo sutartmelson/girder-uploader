@@ -13,9 +13,14 @@ class GirderUploader:
         self._request_metadata = False
 
     def upload_folder(self, girder_dest_path, local_path):
-        """
-        Begins the upload process. If metadata is required, input forms and
-        created and displayed before upload begins. 
+        """Begin the upload process.
+
+        If metadata is required, input forms are created and displayed, and
+        metadata input is collected before upload begins.
+
+        :param girder_dest_path: Unix style path to destination on girder.
+        :param local_path: Path to file/folder to upload.
+
         """
         self._local_path = local_path
         self._girder_dest_path = girder_dest_path
@@ -26,25 +31,31 @@ class GirderUploader:
             self._client.upload(self._local_path, parentId,
                                 parent_type=parentType)
 
-    def request_metadata(self, keyword, ontologies, require=False):
-        """
-        Setup to request metadata from the user after attempting to upload
-        a folder/file.
+    def request_metadata(self, topic, ontologies, require=False):
+        """Create field to request metadata from the user.
 
-        :param keyword:     Keyword of what the metadata requested is
-                            describing (e.i., region, disease)
+        Create metadata request form. The form is displayed when the
+        upload for the file/folder begins. e,g, upload_folder()
+
+        Prior to uploading the file/folder to girder, metadata may be
+        requested from the user. Given the provided ontology, the user
+        searches the ontologies for keywords.
+
+        :param topic:       Topic of the metadata, what it's requested to
+                            describe (e.i., region, disease).
         :param ontologies:  List of ontology IDs to be searched.
         :param require:     Whethere or not to require this metadata to be
-                            filled before upload
+                            filled before upload.
+
         """
         self._request_metadata = True
-        self._bio_search.add_search_widget(keyword, ontologies, require)
+        self._bio_search.add_search_widget(topic, ontologies, require)
 
     def __submit_callback(self, results):
         parentId, parentType = self.__get_parent_id_and_type()
 
         def get_id(id_url):
-            temp_id = id_url.rsplit('/', 1)[-1]
+            temp_id = id_url.rsplit('/',  1)[-1]
             if '#' in temp_id:
                 # RADLEX
                 id = temp_id.rsplit('#', 1)[-1]
@@ -70,11 +81,9 @@ class GirderUploader:
                     'ID' : id,
                     'Resource URL' : resource}
             self._metadata[topic] = meta
-        
+
         for name in results:
-            extract_info(name)      
-        # extract_info('region')
-        # extract_info('disease')
+            extract_info(name)
 
         self._client.add_folder_upload_callback(self.__upload_folder_callback)
         self._client.add_item_upload_callback(self.__upload_item_callback)
