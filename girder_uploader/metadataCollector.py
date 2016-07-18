@@ -28,7 +28,8 @@ class MetadataCollector:
                                                  width='300')
         self._add_button = widgets.Button(description='add', width='100%')
         self._remove_button = widgets.Button(description='remove',
-                                             width='100%')
+                                             width='100%',
+                                             disabled=True)
 
         search_contains = [self._search_input_widget]
         search_container = widgets.HBox(children=search_contains)
@@ -68,7 +69,7 @@ class MetadataCollector:
         self._search_input_widget.observe(self.__search_value_changed,
                                           names='value')
         self._search_results_widget.observe(self.__results_value_change,
-                                            names='selected_label')
+                                            names='value')
         self._add_button.on_click(self.__add_button_click)
         self._remove_button.on_click(self.__remove_button_click)
 
@@ -76,7 +77,7 @@ class MetadataCollector:
         return self._ready
 
     def get_results(self):
-        return self._results_info
+        return self._final_results
 
     def __search(self, search_term, ontologies):
         """Search specified ontologies using bioportals REST API.
@@ -118,29 +119,29 @@ class MetadataCollector:
                 self._results_info = info
 
     def __results_value_change(self, change):
-        # self._selected = self._search_results_widget.selected_label
         self._selected = change['new']
 
     def __add_button_click(self, change):
         self._final_results[self._selected] = self._results_info[self._selected]
         added_words = self._added_word_widget.options
-        added_words.append(self._selected)
-        self._added_word_widget.options = added_words
-        # added_words.append(self._selected)
-
-        # self._added_word_widget.options = added_words
-        print(self._added_word_widget.options)
-        self._ready = True
-        # Execute value change delegate
-        if self._value_changed:
-            self._value_changed()
+        if self._selected not in added_words:
+            added_words.append(self._selected)
+            self._added_word_widget.options = added_words
+            self._ready = True
+            self._remove_button.disabled = False
+            # Execute value change delegate
+            if self._value_changed:
+                self._value_changed()
 
     def __remove_button_click(self, change):
-        selected = self._added_word_widget.selected_label
-        self._added_word_widget.options.remove(selected)
-        self._results_info.pop(selected, None)
-        if len(self._results_info) == 0:
+        selected = self._added_word_widget.value
+        added_words = self._added_word_widget.options
+        added_words.remove(selected)
+        self._added_word_widget.options = added_words
+        self._final_results.pop(selected, None)
+        if len(self._final_results) == 0:
             self._ready = False
+            self._remove_button.disabled = True
             # Execute value change delegate
             if self._value_changed:
                 self._value_changed()

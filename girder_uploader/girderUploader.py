@@ -85,26 +85,27 @@ class GirderUploader:
                 # DOID, UBERON
                 return temp_id.rsplit('_', 1)[-1]
 
-        def extract_info(name):
-            result = results[name]
-            keyword = result[0]
-            dictionary = result[1]
-            topic = name
-            ontology_url = dictionary['links']['ontology']
-            json_result = self._bio_search.GET(ontology_url)
-            acronym = json_result['acronym']
-            name = json_result['name']
-            resource = dictionary['@id']
-            id = get_id(resource)
-            meta = {'Ontology Name': name,
-                    'Ontology Acronym': acronym,
-                    'Name': keyword,
-                    'ID': id,
-                    'Resource URL': resource}
-            self._metadata[topic] = meta
+        def extract_info(topic):
+            keyword_dict = results[topic]
+            for keyword in keyword_dict:
+                dictionary = keyword_dict[keyword]
+                ontology_url = dictionary['links']['ontology']
+                json_result = self._bio_search.GET(ontology_url)
+                acronym = json_result['acronym']
+                name = json_result['name']
+                resource = dictionary['@id']
+                id = get_id(resource)
 
-        for name in results:
-            extract_info(name)
+                meta = {'Ontology Name': name,
+                        'Ontology Acronym': acronym,
+                        'Name': keyword,
+                        'ID': id,
+                        'Resource URL': resource}
+                self._metadata[topic].append(meta)
+
+        for topic in results:
+            self._metadata[topic] = []
+            extract_info(topic)
 
         self._client.add_folder_upload_callback(self.__upload_folder_callback)
         self._client.add_item_upload_callback(self.__upload_item_callback)
