@@ -41,10 +41,25 @@ class BioportalSearchWidgets:
         self._widgets = []
         self._submit_callback = submit_callback
         self._apply_widget = None
+        self._api_url = 'http://data.bioontology.org/'
+        self._key = bioportal_api_key
+        self._headers = {'Authorization': 'apikey token=' + self._key}
     
     def add_search_widget(self, topic, ontologies, required=False):
         mc = MetadataCollector(topic, ontologies, required, self.__value_changed_callback)
         self._widgets.append(mc)
+        
+    def GET(self, url, params=None):
+        """Convenient method for requests.get().
+
+        Headers already included in call. JSON response data is returned.
+
+        :param url: The website to access JSON data from.
+        :param params: Parameters for the REST request.
+
+        """
+        request = requests.get(url, headers=self._headers, params=params)
+        return request.json()
 
     def display_widgets(self):
         self._apply_widget = widgets.Button(description='Submit',

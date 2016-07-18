@@ -70,7 +70,6 @@ class MetadataCollector:
 
         self._container = widgets.VBox(children=[search_container,
                                                  bottom_container])
-
         self._api_url = 'http://data.bioontology.org/'
         self._key = bioportal_api_key
         self._headers = {'Authorization': 'apikey token=' + self._key}
