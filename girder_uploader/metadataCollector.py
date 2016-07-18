@@ -9,6 +9,8 @@ class MetadataCollector:
         self._required = required
         self._ontologies = ontologies
         self._value_changed = value_changed
+        #self._color = '#ffe6e6'
+        self._color = 'red'
         # self._results_info stores keywords as keys and bioportal
         # results as values
         self._restuls_info = dict()
@@ -21,15 +23,19 @@ class MetadataCollector:
         self._search_input_widget = widgets.Text(description=topic,
                                            value='', width='100%')
         self._search_results_widget = widgets.Select(description=results_name,
-                                                     options=['...'],
+                                                     options=[],
                                                      width='300')
         self._added_word_widget = widgets.Select(description='selected words:',
                                                  options=[],
                                                  width='300')
-        self._add_button = widgets.Button(description='add', width='100%')
+        self._add_button = widgets.Button(description='add', width='100%',
+                                          disabled=True)
         self._remove_button = widgets.Button(description='remove',
                                              width='100%',
                                              disabled=True)
+        if required:
+            self._search_input_widget.background_color = self._color
+
 
         search_contains = [self._search_input_widget]
         search_container = widgets.HBox(children=search_contains)
@@ -72,6 +78,8 @@ class MetadataCollector:
                                             names='value')
         self._add_button.on_click(self.__add_button_click)
         self._remove_button.on_click(self.__remove_button_click)
+        self._added_word_widget.observe(self.__selected_value_change,
+                                        names='value')
 
     def has_results(self):
         return self._ready
@@ -94,7 +102,7 @@ class MetadataCollector:
         search = self._api_url + 'search?q=' + search_term
 
         data = self.GET(search, params=parameters)
-        nameList = ['...']
+        nameList = []
         nameDict = {}
         if "collection" in data:
             collection = data["collection"]
@@ -111,15 +119,25 @@ class MetadataCollector:
         new_keyword = change['new'].strip()
         if new_keyword:
             keywords, info = self.__search(new_keyword, self._ontologies)
-            if len(keywords) == 1:
-                temp = ['...', 'NO RESULTS FOUND']
+            if len(keywords) == 0:
+                temp = ['NO RESULTS FOUND']
                 self._search_results_widget.options = temp
+                self._add_button.disabled = True
             else:
                 self._search_results_widget.options = keywords
                 self._results_info = info
+                self._add_button.disabled = False
+        else:
+            temp = []
+            self._search_results_widget.options = temp
+            self._selected = None
+            self._add_button.disabled = True
 
     def __results_value_change(self, change):
         self._selected = change['new']
+
+    def __selected_value_change(self, change):
+        self._remove_button.disabled = False
 
     def __add_button_click(self, change):
         self._final_results[self._selected] = self._results_info[self._selected]
@@ -128,7 +146,6 @@ class MetadataCollector:
             added_words.append(self._selected)
             self._added_word_widget.options = added_words
             self._ready = True
-            self._remove_button.disabled = False
             # Execute value change delegate
             if self._value_changed:
                 self._value_changed()
@@ -141,10 +158,10 @@ class MetadataCollector:
         self._final_results.pop(selected, None)
         if len(self._final_results) == 0:
             self._ready = False
-            self._remove_button.disabled = True
             # Execute value change delegate
             if self._value_changed:
                 self._value_changed()
+        self._remove_button.disabled = True
 
 
 
