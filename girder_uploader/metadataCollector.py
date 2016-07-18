@@ -11,8 +11,25 @@ import requests
 
 class MetadataCollector:
     """Handle information inside the widgets."""
+
     def __init__(self, topic, ontologies, required=False, value_changed=None,
                  bioportal_api_key='efa3babf-b23c-4399-89f7-689bb9d576fb'):
+        """Provide bioportal key, create widgets.
+
+        Create (but not display) needed widgets. If the topic is required
+        before upload, highlight the text box red.
+
+        :param topic: The topic name to be associated with the key words
+        :param ontolgies: The ontolgies to be searched.
+        :param required: Whether or not the topic is required to have at least
+                         one key word added before upload.
+        :param value_changed: Callback which is called everytime the first word
+                              is added to an empty added words widget or when
+                              the last word is removed from the added words
+                              widget.
+        :param bioportal_api_key: The key used to access the bioportal REST API
+
+        """
         self._topic = topic
         self._required = required
         self._ontologies = ontologies
