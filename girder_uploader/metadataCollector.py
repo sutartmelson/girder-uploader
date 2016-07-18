@@ -1,19 +1,26 @@
+"""Includes MetadataCollector class.
+
+Responsible for keeping track of when widget values change or are selected.
+
+"""
+
 import ipywidgets as widgets
 from IPython.display import display
 import requests
 
+
 class MetadataCollector:
+    """Handle information inside the widgets."""
     def __init__(self, topic, ontologies, required=False, value_changed=None,
                  bioportal_api_key='efa3babf-b23c-4399-89f7-689bb9d576fb'):
         self._topic = topic
         self._required = required
         self._ontologies = ontologies
         self._value_changed = value_changed
-        #self._color = '#ffe6e6'
         self._color = 'red'
         # self._results_info stores keywords as keys and bioportal
         # results as values
-        self._restuls_info = dict()
+        self._results_info = dict()
         # self._final_results stores only the info for added words
         self._final_results = dict()
         self._selected = None
@@ -21,7 +28,7 @@ class MetadataCollector:
 
         results_name = topic + " results:"
         self._search_input_widget = widgets.Text(description=topic,
-                                           value='', width='100%')
+                                                 value='', width='100%')
         self._search_results_widget = widgets.Select(description=results_name,
                                                      options=[],
                                                      width='300')
@@ -35,7 +42,6 @@ class MetadataCollector:
                                              disabled=True)
         if required:
             self._search_input_widget.background_color = self._color
-
 
         search_contains = [self._search_input_widget]
         search_container = widgets.HBox(children=search_contains)
@@ -65,12 +71,15 @@ class MetadataCollector:
         return request.json()
 
     def is_required(self):
+        """Return whether the field is required or not before upload."""
         return self._required
 
     def get_topic(self):
+        """Return the topic that is used for the widgets."""
         return self._topic
 
     def display(self):
+        """Display the 5 widgets to be used for the topic(s)."""
         display(self._container)
         self._search_input_widget.observe(self.__search_value_changed,
                                           names='value')
@@ -82,9 +91,16 @@ class MetadataCollector:
                                         names='value')
 
     def has_results(self):
+        """Check if there are words in the added words widget."""
         return self._ready
 
     def get_results(self):
+        """Return the final dictionary results.
+
+        The dictionary keys are the key words in the added words widget, and
+        the values are the responses from bioportal.
+
+        """
         return self._final_results
 
     def __search(self, search_term, ontologies):
@@ -140,7 +156,8 @@ class MetadataCollector:
         self._remove_button.disabled = False
 
     def __add_button_click(self, change):
-        self._final_results[self._selected] = self._results_info[self._selected]
+        tmp = self._selected
+        self._final_results[tmp] = self._results_info[tmp]
         added_words = self._added_word_widget.options
         if self._selected not in added_words:
             added_words.append(self._selected)
@@ -162,8 +179,3 @@ class MetadataCollector:
             if self._value_changed:
                 self._value_changed()
         self._remove_button.disabled = True
-
-
-
-
-
