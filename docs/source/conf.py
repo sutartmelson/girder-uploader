@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'girder_uploader'
-copyright = '2016, Stuart Nelson'
-author = 'Stuart Nelson'
+copyright = '2016, Stuart Nelson, Adam Sorensen'
+author = 'Stuart Nelson, Adam Sorensen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
