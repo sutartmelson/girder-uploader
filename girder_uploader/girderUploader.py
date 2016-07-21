@@ -40,7 +40,7 @@ class GirderUploader:
 
         :param girder_dest_path: Unix style path to destination on girder.
         :param local_path: Path to file/folder to upload.
-        :param metadata: dictionary of metadata.
+        :param metadata: metadata preset
 
         """
         self._metadata = metadata
