@@ -45,7 +45,7 @@ class MetadataCollector:
 
         results_name = topic + " results:"
         self._search_input_widget = widgets.Text(description=topic,
-                                                 value='', width='100%')
+                                                 value='', width='49%')
         self._search_results_widget = widgets.Select(description=results_name,
                                                      options=[],
                                                      width='300')
@@ -173,9 +173,12 @@ class MetadataCollector:
 
     def __add_button_click(self, change):
         tmp = self._selected
+        tmp2 = self._added_word_widget.value
         self._final_results[tmp] = self._results_info[tmp]
         added_words = self._added_word_widget.options
         if self._selected not in added_words:
+            if (tmp == tmp2):
+                self._remove_button.disabled = False
             added_words.append(self._selected)
             self._added_word_widget.options = added_words
             self._ready = True
